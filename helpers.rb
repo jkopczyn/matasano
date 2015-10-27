@@ -1,35 +1,17 @@
-require 'base64'
-require 'byebug'
+require './hexto64.rb'
+require './xor.rb'
 
-def hex_to_bytes(string)
-  string.scan(/../).map(&:hex)
+#hex_to_bytes(hexstring)
+#bytes_to_hex(hex_array)
+#byte_array_xor(bytes1, bytes2)
+#hex_string_xor(hex1, hex2)
+#
+#hex_to_base64(hexstring)
+
+def hex_to_utf8(hexstring)
+  [hexstring].pack("H*")
 end
 
-def bytes_to_base64(byte_array)
-  partition_bytes(byte_array, 4).pack("Q*")
+def bytes_to_utf8(byte_array)
+  byte_array.pack("C*")
 end
-
-def concat_bytes(byte_array)
-  accum = 0
-  byte_array.each do |byte|
-    accum *= 256
-    accum += byte
-  end
-  accum
-end
-
-def partition_bytes(byte_array, chunk_length)
-  chunk = []
-  output_numbers = []
-  byte_array.each do |byte|
-    chunk << byte
-    if chunk.length >= chunk_length
-      output_numbers << concat_bytes(chunk)
-      chunk = []
-    end
-  end
-  output_numbers << concat_bytes(chunk) unless chunk.empty?
-  output_numbers
-end
-
-

@@ -25,3 +25,13 @@ end
 best_lengths = length_to_score.entries.sort_by {|pair| pair[1]}
 p (((1 + ciphertext.length ** 0.5)).to_i)
 p best_lengths[0..9]
+
+#this was a mess. best length 32, probably?
+
+def transpose_to_chunks(array, period)
+  chunks = Array.new(period) { Array.new() }
+  array.each_with_index do |el, idx|
+    chunks[idx % period] << el
+  end
+  chunks
+end

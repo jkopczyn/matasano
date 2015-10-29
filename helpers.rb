@@ -8,15 +8,15 @@ require './xor.rb'
 #
 #hex_to_base64(hexstring)
 
-def hex_to_utf8(hexstring)
+def hex_to_ascii(hexstring)
   [hexstring].pack("H*")
 end
 
-def bytes_to_utf8(byte_array)
+def bytes_to_ascii(byte_array)
   byte_array.pack("C*")
 end
 
-def utf8_to_bytes(text)
+def ascii_to_bytes(text)
   text.unpack("C*")
 end
 
@@ -30,4 +30,16 @@ end
 #
 def frequency_order
   [' '] + %w[e t 0 a o i n s h r d l c u m w f g y p b v k j x q z]
+end
+
+def vigenere(plaintext, key)
+  key_bytes = ascii_to_bytes(key)
+  key_length = key_bytes.length
+  plaintext_bytes = ascii_to_bytes(plaintext)
+  full_key_bytes = (key_bytes * (1 + plaintext_bytes.length/key_length))[0...plaintext_bytes.length]
+  bytes_to_hex(byte_array_xor(plaintext_bytes, full_key_bytes))
+end
+
+def bytes_hamming(bytes1, bytes2)
+  byte_array_xor(bytes1, bytes2).map {|n| "%08b" % n }.join("").count("1")
 end

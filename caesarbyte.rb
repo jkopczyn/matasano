@@ -42,16 +42,16 @@ end
 
 plaintexts = (0...256).map do |byte|
   bytes = byte_array_xor(cipher_bytes, [byte]*cipher_bytes.length)
-  {string: bytes_to_utf8(bytes), score: score_bytes(bytes), byte: byte}
+  {string: bytes_to_ascii(bytes), score: score_bytes(bytes), byte: byte}
 end.sort_by { |el| -el[:score] }
 p plaintexts[0..6].select { |dict| dict[:score] >= 0 }
 
 #testhex = "746865206b696420646f6e277420706c6179"
-##utf8 version: "the kid don't play"
+##ascii version: "the kid don't play"
 #test_bytes = hex_to_bytes(testhex)
 #[1, 2, 4, 8, 16, 32, 64, 128, 256].each do |byte|
 #  compare_byte_array = [byte] * test_bytes.length
 #  xored_array = byte_array_xor(test_bytes, compare_byte_array)
-#  p "#{byte}: #{bytes_to_utf8(xored_array)}, score: #{score_bytes(xored_array)}"
+#  p "#{byte}: #{bytes_to_ascii(xored_array)}, score: #{score_bytes(xored_array)}"
 #end
 

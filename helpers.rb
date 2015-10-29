@@ -16,6 +16,9 @@ def bytes_to_utf8(byte_array)
   byte_array.pack("C*")
 end
 
+def utf8_to_bytes(text)
+  text.unpack("C*")
+end
 
 ##english letter frequency table
 #def frequency_table()

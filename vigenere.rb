@@ -35,3 +35,15 @@ def transpose_to_chunks(array, period)
   end
   chunks
 end
+
+def solve_chunks(chunk_array)
+  key_bytes = []
+  chunk_array.each do |chunk|
+    key_bytes << find_shift(chunk)[:byte]
+  end
+  key_bytes
+end
+
+key_bytes = solve_chunks(transpose_to_chunks(cipher_bytes, 32))
+p key_bytes
+p vigenere_bytes_decrypt(cipher_bytes, key_bytes) 

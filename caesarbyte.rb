@@ -3,7 +3,6 @@ require 'byebug'
 
 
 cipherhex = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-cipher_bytes = hex_to_bytes(cipherhex)
 
 #sensible character range: 32..126
 #most-reasonable range: 32 (space), 65-90, 97-122 (uppercase, lowercase)
@@ -40,11 +39,15 @@ def score_bytes(byte_array)
   score
 end
 
-plaintexts = (0...256).map do |byte|
-  bytes = byte_array_xor(cipher_bytes, [byte]*cipher_bytes.length)
-  {string: bytes_to_ascii(bytes), score: score_bytes(bytes), byte: byte}
-end.sort_by { |el| -el[:score] }
-p plaintexts[0..6].select { |dict| dict[:score] >= 0 }
+def find_shift(cipherhex)
+  cipher_bytes = hex_to_bytes(cipherhex)
+  plaintexts = (0...256).map do |byte|
+    bytes = byte_array_xor(cipher_bytes, [byte]*cipher_bytes.length)
+    {string: bytes_to_ascii(bytes), score: score_bytes(bytes), byte: byte}
+  end.sort_by { |el| -el[:score] }
+  #p plaintexts[0..6].select { |dict| dict[:score] >= 0 }
+  plaintexts[0]
+end
 
 #testhex = "746865206b696420646f6e277420706c6179"
 ##ascii version: "the kid don't play"

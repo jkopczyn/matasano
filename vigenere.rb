@@ -1,6 +1,7 @@
 require './helpers.rb'
 
-ciphertext = File.open("challenge1-6.txt", "r").readlines.map(&:chomp).join()
+ciphertext = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
+#ciphertext = File.open("challenge1-6.txt", "r").readlines.map(&:chomp).join()
 cipher_bytes = ascii_to_bytes(ciphertext)
 
 CHUNK_SIZE = 3
@@ -44,8 +45,10 @@ def solve_chunks(chunk_array, offset=0)
   key_bytes
 end
 
-10.times do |n|
-  key_bytes = solve_chunks(transpose_to_chunks(cipher_bytes, 32),n)
-  p key_bytes
-  p hex_to_ascii(vigenere_bytes_decrypt(cipher_bytes, key_bytes))
+1.upto(12) do |key_length|
+  3.times do |n|
+    key_bytes = solve_chunks(transpose_to_chunks(cipher_bytes, key_length),n)
+    p key_bytes
+    p hex_to_ascii(vigenere_bytes_decrypt(cipher_bytes, key_bytes))
+  end
 end

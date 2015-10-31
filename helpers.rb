@@ -1,3 +1,4 @@
+require 'byebug'
 require './hexto64.rb'
 require './xor.rb'
 
@@ -32,47 +33,71 @@ def frequency_order
 end
 
 def score_frequency(expected, actual)
-  return -100 if actual == 0
+  return -100 unless actual and actual != 0
   multiple = (actual > expected) ? actual/expected : expected/actual
-  [=-100, -Math.log(multiple)].max
+  begin
+  [-100, -Math.log(multiple)].max
+  rescue Exception => e
+    puts "expected: #{expected} actual: #{actual}"
+    raise e
+  end
 end
 
 def total_frequency_score(character_hash)
-  frequency_pairs = frequency_order.each_with_index.map {|el, idx| [el, idx]}
-  critical_indices = (0..7).to_a + frequency_pairs[-5..-1].map {|el| el[1]}
-  frequency_pairs.sort_by do |pair|
-    -character_hash[pair[0]] end.each_with_index.map do |pair, idx|
-     critical_indices.include?(idx) ? (pair[1] - idx).abs : 0
-    end.inject(&:+) * (1 + character_hash.values.inject(&:+)/10)
+  total_score = 0
+  expectations = frequency_table
+  expectations.keys.each do |character|
+    begin
+      total_score += score_frequency(
+        1.0*expectations[character]/expectations[:total],
+        1.0*character_hash[character]/character_hash[:total]
+      ) if character_hash[:total] > 0
+    rescue Exception => e
+      debugger
+      raise e
+    end
+  end
+  return total_score
 end
 
 def score_bytes(byte_array)
   score = 0
-  letter_map = {}
-  frequency_order.each { |letter| letter_map[letter] = 0 }
+  letter_map = {"total": 0}
+  frequency_order.each { |letter| letter_map[letter.to_sym] = 0 }
   byte_array.each do |byte|
     if (7..13).include?(byte)
       next
     elsif byte < 32 or byte > 126
-      score -= 10000
+      score -= 1000
       next
     elsif byte == 32 or (65..90).include?(byte) or (97..122).include?(byte)
       score += 10
     end
     if (33..64).include?(byte) or (91..96).include?(byte) or byte > 122
-      letter_map['0'] += 1
+      letter_map['0'.to_sym] += 1
     else
-      letter_map[byte.chr.downcase] += 1
+      letter_map[byte.chr.downcase.to_sym] += 1
     end
+    letter_map[:total] += 1
   end
-  score += total_frequency_score(letter_map)
+  begin
+    score += total_frequency_score(letter_map)
+  rescue Exception => e
+    debugger
+    raise e
+  end
   score
 end
 
 def find_best_shifts(cipher_bytes)
   plaintexts = (0...256).map do |byte|
     bytes = byte_array_xor(cipher_bytes, [byte]*cipher_bytes.length)
-    {string: bytes_to_ascii(bytes), score: score_bytes(bytes), byte: byte}
+    begin
+      {string: bytes_to_ascii(bytes), score: score_bytes(bytes), byte: byte}
+    rescue Exception => e
+      debugger
+      raise e
+    end
   end.sort_by { |el| -el[:score] }
   #p plaintexts[0..6].select { |dict| dict[:score] >= 0 }
   plaintexts

@@ -33,10 +33,10 @@ def frequency_order
 end
 
 def score_frequency(expected, actual)
-  return -100 unless actual and actual != 0
+  return -20 unless actual and actual != 0
   multiple = (actual > expected) ? actual/expected : expected/actual
   begin
-  [-100, -Math.log(multiple)].max
+  [-20, 10+-10*Math.log(multiple)].max
   rescue Exception => e
     puts "expected: #{expected} actual: #{actual}"
     raise e
@@ -47,17 +47,27 @@ def total_frequency_score(character_hash)
   total_score = 0
   expectations = frequency_table
   expectations.keys.each do |character|
+    next if character == :total
     begin
-      total_score += score_frequency(
-        1.0*expectations[character]/expectations[:total],
-        1.0*character_hash[character]/character_hash[:total]
-      ) if character_hash[:total] > 0
+      if character_hash[:total] > 0
+        char_score = score_frequency(
+          1.0*expectations[character]/expectations[:total],
+          0.0005 + 1.0*character_hash[character]/character_hash[:total]
+          #fudge so that low-frequency characters don't add tons of negative mass
+        ) 
+        total_score += char_score 
+      end
+     #p character
+     #p (1.0*expectations[character]/expectations[:total])/(0.0005 + 1.0*character_hash[character]/character_hash[:total])
+     #p char_score
+     #debugger
     rescue Exception => e
       debugger
       raise e
     end
   end
-  return total_score
+  #puts "frequency_score: #{total_score}"
+  total_score
 end
 
 def score_bytes(byte_array)
@@ -65,16 +75,17 @@ def score_bytes(byte_array)
   letter_map = {"total": 0}
   frequency_order.each { |letter| letter_map[letter.to_sym] = 0 }
   byte_array.each do |byte|
-    if (7..13).include?(byte)
+    if [0,9,10,13].include?(byte)
       next
     elsif byte < 32 or byte > 126
-      score -= 1000
+      score -= 10000
       next
     elsif byte == 32 or (65..90).include?(byte) or (97..122).include?(byte)
-      score += 10
+      score += 100
     end
     if (33..64).include?(byte) or (91..96).include?(byte) or byte > 122
       letter_map['0'.to_sym] += 1
+      score += 10
     else
       letter_map[byte.chr.downcase.to_sym] += 1
     end
@@ -125,4 +136,7 @@ end
 
 def bytes_hamming(bytes1, bytes2)
   byte_array_xor(bytes1, bytes2).map {|n| "%08b" % n }.join("").count("1")
+rescue Exception => e
+  debugger
+  raise e
 end
